@@ -14,7 +14,7 @@ export class ToolsNamespaceScope extends NamespaceScope {
     super(activatedRoute, router);
     this._namespace = userService
       .loggedInUser
-      .map(user => `${user.attributes.username}-osio`);
+      .map(user => `${user.attributes.username}-dsaas-jenkins`);
   }
 
   protected getNamespace(params) {
