@@ -20,8 +20,6 @@ import { APIsStore } from 'fabric8-runtime-console/src/app/kubernetes/store/apis
 @Injectable()
 export class RuntimeConsoleResolver implements Resolve<Context> {
 
-  private _lastRoute: string;
-
   constructor(
     private apiStore: APIsStore,
     private onLogin: OnLogin,
@@ -34,12 +32,13 @@ export class RuntimeConsoleResolver implements Resolve<Context> {
     return this.apiStore.loading.distinctUntilChanged().filter(flag => (!flag))
       .switchMap(() => this.authService.getOpenShiftToken())
       .switchMap(token =>
-        this.oauthConfigStore.resource.do(config => {
+        this.oauthConfigStore.resource.map(config => {
           if (config.loaded) {
             this.onLogin.onLogin(token);
           }
+          return config.loaded;
         })
-      ).first();
+      ).skipWhile(val => (!val)).first();
   }
 
 }
