@@ -41,8 +41,6 @@ export class PipelinesComponent implements OnInit {
   constructor(
     private router: Router,
     private authService: AuthenticationService,
-    private onLogin: OnLogin,
-    private oauthConfigStore: OAuthConfigStore,
     private userService: UserService,
 
     // TODO HACK - Dummy Data loading
@@ -149,9 +147,7 @@ export class PipelinesComponent implements OnInit {
 
 
   ngOnInit() {
-    this.userService.loggedInUser
-      .map(user => `${user.attributes.username}-osio`)
-      .switchMap(namespace => this.pipelinesStore.loadAll())
+    this.pipelinesStore.loadAll()
       .combineLatest(this.buildStore.loadAll(), combineBuildConfigAndBuilds)
       .map(filterPipelines)
       .do(val => {
