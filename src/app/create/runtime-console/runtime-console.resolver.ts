@@ -54,4 +54,4 @@ export let runtimeConsoleLoginProviders = [
   OnLogin,
   APIsStore,
   OAuthConfigStore
-]
+];

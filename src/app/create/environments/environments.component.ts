@@ -8,18 +8,6 @@ import { AuthenticationService, UserService } from 'ngx-login-client';
 
 import { ToolbarConfig, FilterConfig, FilterQuery, FilterEvent, Filter, SortEvent, SortField } from 'ngx-widgets';
 
-// TODO HACK
-import { OnLogin } from 'fabric8-runtime-console/src/app/shared/onlogin.service';
-import { OAuthConfigStore } from 'fabric8-runtime-console/src/app/kubernetes/store/oauth-config-store';
-import {
-  BuildConfig, BuildConfigs,
-  combineBuildConfigAndBuilds,
-  filterEnvironments
-} from 'fabric8-runtime-console/src/app/kubernetes/model/buildconfig.model';
-import { APIsStore } from 'fabric8-runtime-console/src/app/kubernetes/store/apis.store';
-import { BuildConfigStore } from 'fabric8-runtime-console/src/app/kubernetes/store/buildconfig.store';
-import { BuildStore } from 'fabric8-runtime-console/src/app/kubernetes/store/build.store';
-
 class Environment {
   name: string;
   type: EnvironmentType;

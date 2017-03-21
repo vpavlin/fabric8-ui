@@ -8,7 +8,6 @@ import { AuthenticationService, UserService } from 'ngx-login-client';
 
 import { ToolbarConfig, FilterConfig, FilterQuery, FilterEvent, Filter, SortEvent, SortField } from 'ngx-widgets';
 
-// TODO HACK
 import {
   BuildConfig,
   BuildConfigs,
@@ -30,7 +29,7 @@ export class PipelinesComponent implements OnInit {
   private _apps: FilterQuery[] = [];
   private _codebases: FilterQuery[] = [];
   private _filteredPipelines: BuildConfig[] = [];
-  private _allPipelines: BuildConfig = [];
+  private _allPipelines: BuildConfig[] = [];
   private _appliedFilters: Filter[] = [];
   private _ascending: boolean;
   private _currentSortField: SortField = {
@@ -109,10 +108,10 @@ export class PipelinesComponent implements OnInit {
   compare(a: BuildConfig, b: BuildConfig) {
     let res = 0;
 
-    if (this._currentSortField.id === 'application' && a.labels.app && b.labels.app) {
-      res = a.labels.app.localeCompare(b.labels.app);
-    } else if (this._currentSortField.id === 'codebase' && a.labels.codebase && b.labels.codebase) {
-      res = a.labels.codebase.localeCompare(b.labels.codebase);
+    if (this._currentSortField.id === 'application' && a.labels['app'] && b.labels['app']) {
+      res = a.labels['app'].localeCompare(b.labels['app']);
+    } else if (this._currentSortField.id === 'codebase' && a.labels['codebase'] && b.labels['codebase']) {
+      res = a.labels['codebase'].localeCompare(b.labels['codebase']);
     }
 
     if (!this._ascending) {
@@ -129,11 +128,11 @@ export class PipelinesComponent implements OnInit {
         let matches = true;
         this._appliedFilters.forEach(filter => {
           if (filter.field.id === 'application') {
-            if (filter.value !== bc.labels.app) {
+            if (filter.value !== bc.labels['app']) {
               matches = false;
             }
           } else if (filter.field.id === 'codebase') {
-            if (filter.value !== bc.labels.codebase) {
+            if (filter.value !== bc.labels['codebase']) {
               matches = false;
             }
           }
@@ -154,11 +153,11 @@ export class PipelinesComponent implements OnInit {
       .do(val => {
         (val as BuildConfig[])
           .forEach(buildConfig => {
-            if (!this._apps.find(fq => fq.id === buildConfig.labels.app)) {
-              this._apps.push({ id: buildConfig.labels.app, value: buildConfig.labels.app } as FilterQuery);
+            if (!this._apps.find(fq => fq.id === buildConfig.labels['app'])) {
+              this._apps.push({ id: buildConfig.labels['app'], value: buildConfig.labels['app'] } as FilterQuery);
             }
-            if (!this._codebases.find(fq => fq.id === buildConfig.labels.codebase)) {
-              this._codebases.push({ id: buildConfig.labels.codebase, value: buildConfig.labels.codebase } as FilterQuery);
+            if (!this._codebases.find(fq => fq.id === buildConfig.labels['codebase'])) {
+              this._codebases.push({ id: buildConfig.labels['codebase'], value: buildConfig.labels['codebase'] } as FilterQuery);
             }
           });
       })
