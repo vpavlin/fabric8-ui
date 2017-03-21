@@ -9,9 +9,6 @@ const routes: Routes = [
   {
     path: '',
     component: CreateComponent,
-    resolve: {
-      runtime: RuntimeConsoleResolver
-    },
     children: [
       { path: '', component: CodebasesComponent },
       { path: 'pipelines', loadChildren: './pipelines/pipelines.module#PipelinesModule' },

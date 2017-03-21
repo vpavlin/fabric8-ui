@@ -5,16 +5,16 @@ import { Observable } from 'rxjs';
 import { UserService } from 'ngx-login-client';
 import { NamespaceScope } from 'fabric8-runtime-console/src/app/kubernetes/service/namespace.scope';
 
-@Injectable()
-export class ToolsNamespaceScope extends NamespaceScope {
+/**
+ * A NamespaceScope which always returns a particular namespace
+ */
+export abstract class StaticNamespaceScope extends NamespaceScope {
 
   private _namespace: Observable<string>;
 
-  constructor(activatedRoute: ActivatedRoute, router: Router, userService: UserService) {
+  constructor(activatedRoute: ActivatedRoute, router: Router, namespace: Observable<string>) {
     super(activatedRoute, router);
-    this._namespace = userService
-      .loggedInUser
-      .map(user => `${user.attributes.username}-dsaas-jenkins`);
+    this._namespace = namespace;
   }
 
   protected getNamespace(params) {

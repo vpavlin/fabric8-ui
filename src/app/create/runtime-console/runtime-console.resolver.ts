@@ -12,11 +12,15 @@ import {
   ActivatedRouteSnapshot
 } from '@angular/router';
 
-// TODO HACK
-import { OnLogin } from 'fabric8-runtime-console/src/app/shared/onlogin.service';
-import { OAuthConfigStore } from 'fabric8-runtime-console/src/app/kubernetes/store/oauth-config-store';
-import { APIsStore } from 'fabric8-runtime-console/src/app/kubernetes/store/apis.store';
+// TODO HACK Replace with token injection
+import {
+  OnLogin,
+  OAuthConfigStore,
+  APIsStore,
+  LoginService
+} from 'fabric8-runtime-console';
 
+// A resolver which can ensure the runtime console is properly logged in
 @Injectable()
 export class RuntimeConsoleResolver implements Resolve<Context> {
 
@@ -42,3 +46,12 @@ export class RuntimeConsoleResolver implements Resolve<Context> {
   }
 
 }
+
+// TODO HACK Replace with openshift token injection
+export let runtimeConsoleLoginProviders = [
+  RuntimeConsoleResolver,
+  LoginService,
+  OnLogin,
+  APIsStore,
+  OAuthConfigStore
+]

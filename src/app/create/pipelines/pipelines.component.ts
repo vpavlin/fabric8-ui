@@ -10,12 +10,13 @@ import { ToolbarConfig, FilterConfig, FilterQuery, FilterEvent, Filter, SortEven
 
 // TODO HACK
 import {
-  BuildConfig, BuildConfigs,
+  BuildConfig,
+  BuildConfigs,
   combineBuildConfigAndBuilds,
-  filterPipelines
-} from 'fabric8-runtime-console/src/app/kubernetes/model/buildconfig.model';
-import { BuildConfigStore } from 'fabric8-runtime-console/src/app/kubernetes/store/buildconfig.store';
-import { BuildStore } from 'fabric8-runtime-console/src/app/kubernetes/store/build.store';
+  filterPipelines,
+  BuildConfigStore,
+  BuildStore
+} from 'fabric8-runtime-console';
 
 @Component({
   selector: 'alm-pipelines',
@@ -33,10 +34,10 @@ export class PipelinesComponent implements OnInit {
   private _appliedFilters: Filter[] = [];
   private _ascending: boolean;
   private _currentSortField: SortField = {
-            id: 'application',
-            title: 'Application',
-            sortType: 'alpha'
-          } as SortField;
+    id: 'application',
+    title: 'Application',
+    sortType: 'alpha'
+  } as SortField;
 
   constructor(
     private router: Router,
