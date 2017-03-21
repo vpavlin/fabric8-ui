@@ -5,6 +5,10 @@ import { Observable } from 'rxjs/Observable';
 
 import { ValWrapper } from './val-wrapper';
 
+interface LoadCallback<T> {
+  (json: any): T;
+}
+
 @Injectable()
 export class ConfigStore {
 
@@ -14,19 +18,24 @@ export class ConfigStore {
     private http: Http
   ) { }
 
-  get<T>(name: string): Observable<ValWrapper<T>> {
+  get<T>(name: string, load?: LoadCallback<T>): Observable<ValWrapper<T>> {
     if (this._cache.has(name)) {
       return this._cache
         .get(name);
     } else {
       let res = this.http
         .get(`/_config/${name}.config.json`)
-        .map(res => res.json)
-        .map(json => ({
-          val: (json as any),
-          loading: false
-        } as ValWrapper<T>));
+        .map(resp => resp.json())
+        .map(json => {
+          return {
+            val: (json as any),
+            loading: false
+          } as ValWrapper<T>;
+        })
+        .do(config => console.log('Config loaded', config))
+        .publishReplay(1);
       this._cache.set(name, res);
+      res.connect();
       return res;
     }
   }
