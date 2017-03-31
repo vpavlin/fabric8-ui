@@ -1,53 +1,69 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, ContentChild, OnInit, TemplateRef, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { Codebase } from './services/codebase';
 import { CodebasesService } from './services/codebases.service';
-import { ListViewConfig } from 'ngx-widgets';
-import { Logger } from 'ngx-base';
 import { Context, Contexts } from 'ngx-fabric8-wit';
+import { GitHubService } from "./services/github.service";
+import { ListViewConfig, EmptyStateConfig } from 'ngx-widgets';
+import { Broadcaster, Logger, Notification, NotificationType, Notifications } from 'ngx-base';
 
 @Component({
   encapsulation: ViewEncapsulation.None,
   selector: 'codebases',
   templateUrl: './codebases.component.html',
   styleUrls: ['./codebases.component.scss'],
-  providers: [CodebasesService]
+  providers: [CodebasesService, GitHubService]
 })
 export class CodebasesComponent implements OnInit {
+  @ContentChild('actionTemplate') actionTemplate: TemplateRef<any>;
+  @ContentChild('itemTemplate') itemTemplate: TemplateRef<any>;
+  @ContentChild('itemExpandedTemplate') itemExpandedTemplate: TemplateRef<any>;
+
   codebases: Codebase[];
   context: Context;
+  emptyStateConfig: EmptyStateConfig;
   listViewConfig: ListViewConfig;
 
   constructor(
+      private broadcaster: Broadcaster,
       private codebasesService: CodebasesService,
       private contexts: Contexts,
+      private gitHubService: GitHubService,
       private logger: Logger,
+      private notifications: Notifications,
       private router: Router) {
     this.contexts.current.subscribe(val => this.context = val);
+    this.gitHubService.clearCache();
+
+    // this.broadcaster.broadcast('filter');
+
+    // this.broadcaster
+    //   .on('filter')
+    //   .subscribe(filter => {
+    //     // do something
+    //   });
   }
 
   ngOnInit() {
-    if (this.context && this.context.space) {
-      this.codebasesService.getCodebases(this.context.space.id).subscribe(codebases => {
-        this.codebases = codebases;
+    this.updateCodebases();
 
-        // Todo: Temporary associate codebase until empty state config is ready
-        if (this.codebases === undefined || this.codebases.length == 0) {
-          let codebase = this.createTransientCodebase();
-          this.codebasesService.create(this.context.space.id, codebase).subscribe(codebase => {
-            this.codebases = [codebase];
-          });
-        }
-      });
-    } else {
-      this.logger.error("Failed to retrieve codebases");
-    }
+    this.emptyStateConfig = {
+      actions: [{
+        id: 'action1',
+        name: 'Add a Codebase',
+        title: 'Add a Codebase',
+        type: 'main'
+      }],
+      icon: 'pficon-add-circle-o',
+      title: 'Add a Codebase',
+      info: "Start by importing your code repository."
+    } as EmptyStateConfig;
 
     this.listViewConfig = {
       dblClick: false,
       dragEnabled: false,
-      //emptyStateConfig: this.emptyStateConfig,
+      emptyStateConfig: this.emptyStateConfig,
       multiSelect: false,
       selectItems: false,
       //selectionMatchProp: 'name',
@@ -56,40 +72,37 @@ export class CodebasesComponent implements OnInit {
     } as ListViewConfig;
   }
 
-  // Todo: Temporary associate codebase until empty state config is ready
-  createTransientCodebase(): Codebase {
-    return {
-      attributes: {
-        type: 'git',
-        url: 'git@github.com:almighty/almighty-core.git'
-      },
-      type: 'codebases'
-    } as Codebase;
+  // Actions
+
+  updateCodebase($event: Codebase): void {
+    this.updateCodebases();
   }
 
-  getName(codebase: Codebase): string {
-    if (codebase.attributes.type === 'git') {
-      return codebase.attributes.url.replace('.git', '').replace('git@github.com:', '');
-    } else {
-      codebase.attributes.url;
+  // Private
+
+  /**
+   * Update latest codebases for current space
+   */
+  private updateCodebases(): void {
+    if (this.context === undefined || this.context.space === undefined) {
+      this.handleError("Context space is undefined", NotificationType.DANGER);
+      return;
     }
+
+    // Get codebases
+    this.codebasesService.getCodebases(this.context.space.id).subscribe(codebases => {
+      if (codebases != null) {
+        this.codebases = codebases;
+      }
+    }, error => {
+      this.handleError("Failed to retrieve codebases", NotificationType.DANGER);
+    });
   }
 
-  getUrl(codebase: Codebase): string {
-    if (codebase.attributes.type === 'git') {
-      return codebase.attributes.url.replace('.git', '').replace(':', '/').replace('git@', 'https://');
-    } else {
-      codebase.attributes.url;
-    }
-  }
-
-  // Slide-out Panel
-
-  // Todo: Move to own component
-  addCodebase($event: Codebase): void {
-    if (this.codebases === undefined) {
-      this.codebases = [];
-    }
-    this.codebases.push($event);
+  private handleError(error: string, type: NotificationType) {
+    this.notifications.message({
+      message: error,
+      type: type
+    } as Notification);
   }
 }

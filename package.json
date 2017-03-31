@@ -87,6 +87,7 @@
     "webpack": "webpack"
   },
   "dependencies": {
+    "@angular/animations": "4.0.1",
     "@angular/common": "2.4.9",
     "@angular/compiler": "2.4.9",
     "@angular/compiler-cli": "2.4.9",

@@ -25,23 +25,79 @@ export class CodebasesService {
     this.spacesUrl = apiUrl + 'spaces';
   }
 
+  /**
+   * Add a codbase to the given space
+   *
+   * @param spaceId The ID associated with the given space
+   * @param codebase The codebase to add
+   * @returns {Observable<Codebase>}
+   */
+  addCodebase(spaceId: string, codebase: Codebase): Observable<Codebase> {
+    let url = `${this.spacesUrl}/${spaceId}/codebases`;
+    let payload = JSON.stringify({ data: codebase });
+    return this.http
+      .post(url, payload, { headers: this.headers })
+      .map(response => {
+        return response.json().data as Codebase;
+      })
+      .catch((error) => {
+        return this.handleError(error);
+      });
+  }
+
+  /**
+   * Get the codebases associated with give space
+   *
+   * @param spaceId The ID associated with the given space
+   * @returns {Observable<Codebase>}
+   */
   getCodebases(spaceId: string): Observable<Codebase[]> {
     let url = `${this.spacesUrl}/${spaceId}/codebases`;
     return this.http.get(url, { headers: this.headers })
-        .map((response) => {
-          return response.json().data as Codebase;
-        })
-        .catch((error) => {
-          return this.handleError(error);
-        });
+      .map((response) => {
+        // Extract data from JSON API response, and assert to an array of repos.
+        let Codebases: Codebase[] = response.json().data as Codebase[];
+        return Codebases;
+      })
+      .catch((error) => {
+        return this.handleError(error);
+      });
   }
 
-  getCodebasesPaged(spaceId: string, pageSize: number = 20): Observable<Codebase[]> {
+  /**
+   * Get paged codebases associated with give space
+   *
+   * @param spaceId The ID associated with the given space
+   * @param pageSize The page limit to retrieve (default is 20)
+   * @returns {Observable<Codebase[]>}
+   */
+  getPagedCodebases(spaceId: string, pageSize: number = 20): Observable<Codebase[]> {
     let url = `${this.spacesUrl}/${spaceId}/codebases` + '?page[limit]=' + pageSize;
-    return this.getCodebasesDelegate(url, true);
+    return this.getPagedCodebasesDelegate(url);
   }
 
-  getCodebasesDelegate(url: string, isAll: boolean): Observable<Codebase[]> {
+  /**
+   * Get next paged codebases associated with give space
+   *
+   * @returns {Observable<Codebase[]>}
+   */
+  getNextPagedCodebases(): Observable<Codebase[]> {
+    if (this.nextLink) {
+      return this.getPagedCodebasesDelegate(this.nextLink);
+    } else {
+      return Observable.throw('No more codebases found');
+    }
+  }
+
+  // Private
+
+  /**
+   * Get the codebases associated with the given space
+   *
+   * @param url The URL used to retrieve paged codebases
+   * @returns {Observable<Codebase[]>}
+   */
+  private getPagedCodebasesDelegate(url: string): Observable<Codebase[]> {
     return this.http
       .get(url, { headers: this.headers })
       .map(response => {
@@ -54,47 +110,13 @@ export class CodebasesService {
         } else {
           this.nextLink = null;
         }
-        // Extract data from JSON API response, and assert to an array of spaces.
+        // Extract data from JSON API response, and assert to an array of codebases.
         let newCodebases: Codebase[] = response.json().data as Codebase[];
         return newCodebases;
       })
       .catch((error) => {
         return this.handleError(error);
       });
-  }
-
-  getMoreCodebases(): Observable<Codebase[]> {
-    if (this.nextLink) {
-      return this.getCodebasesDelegate(this.nextLink, false);
-    } else {
-      return Observable.throw('No more codebases found');
-    }
-  }
-
-  create(spaceId: string, codebase: Codebase): Observable<Codebase> {
-    let url = `${this.spacesUrl}/${spaceId}/codebases`;
-    let payload = JSON.stringify({ data: codebase });
-    return this.http
-        .post(url, payload, { headers: this.headers })
-        .map(response => {
-          return response.json().data as Codebase;
-        })
-        .catch((error) => {
-          return this.handleError(error);
-        });
-  }
-
-  update(codebase: Codebase): Observable<Codebase> {
-    let url = `${this.spacesUrl}/${codebase.id}`;
-    let payload = JSON.stringify({ data: codebase });
-    return this.http
-        .patch(url, payload, { headers: this.headers })
-        .map(response => {
-          return response.json().data as Codebase;
-        })
-        .catch((error) => {
-          return this.handleError(error);
-        });
   }
 
   private handleError(error: any) {
